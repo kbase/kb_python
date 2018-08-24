@@ -9,21 +9,21 @@ RUN apt-get update -y \
 	&& apt-get install -y apt-transport-https ca-certificates make software-properties-common \
     	git apt-utils bzip2 unzip curl sudo wget \
 	&& apt-get install -y --no-install-recommends \
-		bzip2 \
-		unzip \
+		bzip2 unzip uwsgi-plugin-python3 \
 	&& apt-get clean
 
 ENV PATH $PATH:/kb/runtime/bin
+
+# The "source" built-in that python environments use won't work under /bin/sh,
+# so change the default shell to bash
+SHELL ["/bin/bash", "-c"]
 RUN cd /tmp \
-	&& wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh \
-	&& bash Miniconda2-latest-Linux-x86_64.sh -b -p /kb/runtime \
-	&& conda install pyopenssl ndg-httpsclient pyasn1 pyyaml gitpython requests 'requests[security]' \
-		coverage biopython \
-	&& conda install -c conda-forge uwsgi wsgiref \
-	&& conda install -c auto jsonrpcbase \
-	&& conda install -c richardotis nose2 \
-	&& apt-get install -y python3-minimal python3-pip \
-	&& pip3 install jsonrpcbase numpy biopython \
+	&& wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+	&& bash Miniconda3-latest-Linux-x86_64.sh -b -p /kb/runtime \
+	&& source /kb/runtime/bin/activate \
+	&& conda install python=3.6 pyopenssl ndg-httpsclient pyasn1 pyyaml gitpython requests 'requests[security]' \
+		coverage biopython nose \
+	&& pip install jsonrpcbase \
 	&& apt-get clean
 
 # The BUILD_DATE value seem to bust the docker cache when the timestamp changes, move to
